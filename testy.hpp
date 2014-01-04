@@ -23,9 +23,8 @@ namespace testy {
 #define Suite(name, code) \
   int main() { \
     testy::TestSuite testSuite; \
-    std::cout << std::endl \
-              << "  \e[1mTesty - test module "#name"\e[m" \
-              << std::endl; \
+    testSuite.displayTitle("Testy - test module "#name); \
+    std::cout << std::endl; \
     code \
     return testSuite.run(); \
   }
@@ -63,11 +62,24 @@ class TestSuite {
   typedef std::list<std::pair<std::string, std::function<bool()>>> Unit;
   TestSuite() {}
   ~TestSuite() {}
+  inline void displayTitle(std::string const &title);
+  inline void displaySubtitle(std::string const &subTitle);
   inline void addUnit(std::string const &desc, Unit const &unit);
   inline int run();
  private:
   std::list<std::pair<std::string, Unit>> _units;
 };
+
+inline void TestSuite::displayTitle(std::string const &title) {
+    std::cout << std::endl << "  " << title << std::endl;
+    std::cout << "  ";
+    for (size_t i = 0; i < title.size(); ++i)
+      std::cout << "=";
+}
+
+inline void TestSuite::displaySubtitle(std::string const &subTitle) {
+  std::cout << "  \e[m## " << subTitle << std::endl << std::endl;
+}
 
 /**
  * Register a new unit test.
@@ -93,8 +105,7 @@ inline int TestSuite::run() {
   for (auto &unit : _units) {
 
     // Display the test description
-
-    std::cout << "  \e[1;36m► " << unit.first << std::endl << std::endl;
+    displaySubtitle(unit.first);
 
     for (auto &test : unit.second) {
 
@@ -123,13 +134,12 @@ inline int TestSuite::run() {
 
   // Display the result of the tests
 
-  std::cout << "  \e[35m";
   if (fail) {
-    std::cout << "✗ " << fail << " of "
+    std::cout << "  \e[0;31m✗ " << fail << " of "
               << total << " tests failed "
               << "(" << duration << "ms)";
   } else {
-    std::cout << "✓ " << total
+    std::cout << "  \e[0;32m✓ " << total
               << " tests completed "
               << "(" << duration << "ms)";
   }
