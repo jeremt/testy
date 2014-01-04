@@ -10,25 +10,33 @@ Simple add your test by category, with a list of test functions and descriptions
 
 ```c++
 
-  testy::add("Calculator", {
-    {"Should equals to 4", [] () {
+Suite("myModule", {
+
+  describe("Calculator",
+
+    it("Should equals to 4",
       return Calculator::getInstance().add(1, 2) == 3;
-    }},
-    {"The string should not be a number", [] () {
+    ),
+
+    it("The string should not be a number",
       return Calculator::getInstance().isNumber("test") == false;
-    }},
-    {"Should fail", [] () {
+    ),
+
+    it("Should fail",
       return false;
-    }}
-  });
+    )
 
-  testy::add("Useless tests", {
-    {"Should return true", [] () {
+  )
+
+  describe("Useless tests",
+
+    it("Should return true",
       return true;
-    }}
-  });
+    )
 
-  return testy::run();
+  )
+
+})
 
 ```
 

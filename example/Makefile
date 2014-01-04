@@ -114,6 +114,30 @@ test/fast:
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/build
 .PHONY : test/fast
 
+Calculator.o: Calculator.cpp.o
+.PHONY : Calculator.o
+
+# target to build an object file
+Calculator.cpp.o:
+	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/Calculator.cpp.o
+.PHONY : Calculator.cpp.o
+
+Calculator.i: Calculator.cpp.i
+.PHONY : Calculator.i
+
+# target to preprocess a source file
+Calculator.cpp.i:
+	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/Calculator.cpp.i
+.PHONY : Calculator.cpp.i
+
+Calculator.s: Calculator.cpp.s
+.PHONY : Calculator.s
+
+# target to generate assembly for a file
+Calculator.cpp.s:
+	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/Calculator.cpp.s
+.PHONY : Calculator.cpp.s
+
 test.o: test.cpp.o
 .PHONY : test.o
 
@@ -147,6 +171,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... test"
+	@echo "... Calculator.o"
+	@echo "... Calculator.i"
+	@echo "... Calculator.s"
 	@echo "... test.o"
 	@echo "... test.i"
 	@echo "... test.s"

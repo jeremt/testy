@@ -14,6 +14,25 @@
  */
 namespace testy {
 
+#define Suite(name, code) \
+  int main() { \
+    std::cout << std::endl \
+              << "  Testy - test module "#name \
+              << std::endl; \
+    code \
+    return testy::run(); \
+  }
+
+#define describe(name, ...) \
+  testy::add(name, { \
+    __VA_ARGS__ \
+  });
+
+#define it(text, code) \
+  {text, [] () { \
+      code \
+    }}
+
 /**
  * @typedef Unit
  * The data type for one unit.
