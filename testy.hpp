@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <chrono>
 #include <functional>
+#include <unistd.h>
 
 /**
  * @namespace testy
@@ -58,18 +59,23 @@ inline void add(std::string const &desc, Unit const &unit) {
  * @return Returns the number of failures or 0 on success.
  */
 inline int run() {
-  std::chrono::time_point<std::chrono::system_clock> start;
-  std::chrono::time_point<std::chrono::system_clock> t;
-  std::chrono::duration<double> d;
+  std::chrono::steady_clock::time_point before;
   int fail = 0;
   int total = 0;
+  int duration = 0;
 
-  start = std::chrono::system_clock::now();
   std::cout << std::endl;
   for (auto &unit : units) {
+
+    // Display the test description
+
     std::cout << "  \e[1;36m► " << unit.first << std::endl << std::endl;
+
     for (auto &test : unit.second) {
-      t = std::chrono::system_clock::now();
+
+      // Run the test and display the fail or success message
+
+      before = std::chrono::steady_clock::now();
       std::cout << "    ";
       if (!test.second()) {
         ++fail;
@@ -77,18 +83,30 @@ inline int run() {
       } else {
         std::cout << "\e[0;32m✓ \e[1;30m";
       }
-      d = std::chrono::system_clock::now() - t;
-      std::cout << test.first << " (" << std::fixed << d.count() << "s)" << std::endl;
+
+      // and duration of the function call
+
+      int delta = (std::chrono::steady_clock::now() - before).count();
+      duration += delta;
+      std::cout << test.first << " ("
+                << std::fixed << delta
+                << "s)" << std::endl;
       ++total;
     }
     std::cout << std::endl;
   }
+
+  // Display the result of the tests
+
   std::cout << "  \e[35m";
-  d = std::chrono::system_clock::now() - start;
   if (fail) {
-    std::cout << "✗ " << fail << " of " << total << " tests failed " << "(" << d.count() << "ms)";
+    std::cout << "✗ " << fail << " of "
+              << total << " tests failed "
+              << "(" << duration << "ms)";
   } else {
-    std::cout << "✓ " << total << " tests completed " << "(" << d.count() << "ms)";
+    std::cout << "✓ " << total
+              << " tests completed "
+              << "(" << duration << "ms)";
   }
   std::cout << "\e[m" << std::endl << std::endl;
   return fail;
