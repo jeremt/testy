@@ -3,10 +3,10 @@ testy
 
 Testy is a micro C++ unit test tool.
 
-Example
--------
+Usage
+-----
 
-Simple add your test by category, with a list of test functions and descriptions.
+Simple include testy.hpp into a c++ file and compile with your file to test.
 
 ```c++
 
@@ -48,6 +48,6 @@ Suite("myModule", {
 
 ```
 
-The previous code will generate the following output:
+Then, execute your program and show the following output:
 
 ![myImage](example.png)
