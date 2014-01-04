@@ -24,7 +24,6 @@ namespace testy {
   int main() { \
     testy::TestSuite testSuite; \
     testSuite.displayTitle("Testy - test module "#name); \
-    std::cout << std::endl; \
     code \
     return testSuite.run(); \
   }
@@ -71,10 +70,11 @@ class TestSuite {
 };
 
 inline void TestSuite::displayTitle(std::string const &title) {
-    std::cout << std::endl << "  " << title << std::endl;
+    std::cout << std::endl << "  \e[1m" << title << std::endl;
     std::cout << "  ";
     for (size_t i = 0; i < title.size(); ++i)
       std::cout << "=";
+    std::cout << "\e[m"<< std::endl;
 }
 
 inline void TestSuite::displaySubtitle(std::string const &subTitle) {
