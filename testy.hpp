@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <list>
 #include <unordered_map>
 #include <string>
 #include <iostream>
@@ -15,20 +16,32 @@
  */
 namespace testy {
 
+/**
+ * @macro
+ * The macro used to create the test suite.
+ */
 #define Suite(name, code) \
   int main() { \
     std::cout << std::endl \
-              << "  Testy - test module "#name \
+              << "  \e[1mTesty - test module "#name"\e[m" \
               << std::endl; \
     code \
     return testy::run(); \
   }
 
+/**
+ * @macro
+ * Describe one entity of the suite.
+ */
 #define describe(name, ...) \
   testy::add(name, { \
     __VA_ARGS__ \
   });
 
+/**
+ * @macro
+ * Test one action of the suite.
+ */
 #define it(text, code) \
   {text, [] () { \
       code \
@@ -38,12 +51,12 @@ namespace testy {
  * @typedef Unit
  * The data type for one unit.
  */
-typedef std::unordered_map<std::string, std::function<bool()>> Unit;
+typedef std::list<std::pair<std::string, std::function<bool()>>> Unit;
 
 /**
  * All units.
  */
-std::unordered_map<std::string, Unit> units;
+std::list<std::pair<std::string, Unit>> units;
 
 /**
  * Register a new unit test.
@@ -51,7 +64,7 @@ std::unordered_map<std::string, Unit> units;
  * @param unit The unit which contains all tests.
  */
 inline void add(std::string const &desc, Unit const &unit) {
-  units[desc] = unit;
+  units.push_back(std::make_pair(desc, unit));
 }
 
 /**
@@ -59,10 +72,10 @@ inline void add(std::string const &desc, Unit const &unit) {
  * @return Returns the number of failures or 0 on success.
  */
 inline int run() {
-  std::chrono::steady_clock::time_point before;
+  std::chrono::steady_clock::time_point prev;
   int fail = 0;
   int total = 0;
-  int duration = 0;
+  size_t duration = 0;
 
   std::cout << std::endl;
   for (auto &unit : units) {
@@ -75,7 +88,7 @@ inline int run() {
 
       // Run the test and display the fail or success message
 
-      before = std::chrono::steady_clock::now();
+      prev = std::chrono::steady_clock::now();
       std::cout << "    ";
       if (!test.second()) {
         ++fail;
@@ -86,11 +99,11 @@ inline int run() {
 
       // and duration of the function call
 
-      int delta = (std::chrono::steady_clock::now() - before).count();
+      size_t delta = (std::chrono::steady_clock::now() - prev).count() / 1000;
       duration += delta;
       std::cout << test.first << " ("
                 << std::fixed << delta
-                << "s)" << std::endl;
+                << "ms)" << std::endl;
       ++total;
     }
     std::cout << std::endl;

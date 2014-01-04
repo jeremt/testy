@@ -16,6 +16,11 @@ Suite("myModule", {
 
     it("Should fail",
       return false;
+    ),
+
+    it("Should take time",
+      Calculator::getInstance().bigCalc();
+      return true;
     )
 
   )

@@ -6,6 +6,7 @@ public:
   Calculator();
   ~Calculator();
   static Calculator &getInstance();
+  void bigCalc();
   template<typename Type>
   Type add(Type a, Type b);
   template<typename Type>
