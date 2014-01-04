@@ -22,11 +22,12 @@ namespace testy {
  */
 #define Suite(name, code) \
   int main() { \
+    testy::TestSuite testSuite; \
     std::cout << std::endl \
               << "  \e[1mTesty - test module "#name"\e[m" \
               << std::endl; \
     code \
-    return testy::run(); \
+    return testSuite.run(); \
   }
 
 /**
@@ -34,7 +35,7 @@ namespace testy {
  * Describe one entity of the suite.
  */
 #define describe(name, ...) \
-  testy::add(name, { \
+  testSuite.addUnit(name, { \
     __VA_ARGS__ \
   });
 
@@ -47,38 +48,49 @@ namespace testy {
       code \
     }}
 
-/**
- * @typedef Unit
- * The data type for one unit.
- */
-typedef std::list<std::pair<std::string, std::function<bool()>>> Unit;
+#define test(expr) return expr;
 
 /**
- * All units.
+ * TestSuite
+ * Simple test suite in which you can register units and run all unit tests.
  */
-std::list<std::pair<std::string, Unit>> units;
+class TestSuite {
+ public:
+  /**
+   * @typedef Unit
+   * Describe a unit to test.
+   */
+  typedef std::list<std::pair<std::string, std::function<bool()>>> Unit;
+  TestSuite() {}
+  ~TestSuite() {}
+  inline void addUnit(std::string const &desc, Unit const &unit);
+  inline int run();
+ private:
+  std::list<std::pair<std::string, Unit>> _units;
+};
 
 /**
  * Register a new unit test.
  * @param desc The description of this unit.
  * @param unit The unit which contains all tests.
  */
-inline void add(std::string const &desc, Unit const &unit) {
-  units.push_back(std::make_pair(desc, unit));
+inline void TestSuite::addUnit(std::string const &desc,
+                               TestSuite::Unit const &unit) {
+  _units.push_back(std::make_pair(desc, unit));
 }
 
 /**
  * Return all unit tests.
  * @return Returns the number of failures or 0 on success.
  */
-inline int run() {
+inline int TestSuite::run() {
   std::chrono::steady_clock::time_point prev;
   int fail = 0;
   int total = 0;
   size_t duration = 0;
 
   std::cout << std::endl;
-  for (auto &unit : units) {
+  for (auto &unit : _units) {
 
     // Display the test description
 

@@ -10,7 +10,7 @@ Suite("myModule", {
       return Calculator::getInstance().add(1, 2) == 3;
     ),
 
-    it("The string should not be a number",
+    it("Should not be a number",
       return Calculator::getInstance().isNumber("test") == false;
     ),
 
