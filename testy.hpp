@@ -172,6 +172,13 @@ inline int TestSuite::run() {
               << "(" << duration << "ms)";
   }
   std::cout << "\e[m" << std::endl << std::endl;
+
+// Wait for keyboard press on windows to keep the output console opened.
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
+  std::cout << "  [ Press any key to quit ]" << std::endl << std::endl;
+  std::cin.get();
+#endif
+
   return fail;
 }
 
