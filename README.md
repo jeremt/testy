@@ -51,3 +51,10 @@ Suite("myModule", {
 Then, execute your program and show the following output:
 
 ![myImage](example.png)
+
+TODO
+----
+
+- Add testTime macro to test `expr` duration.
+- Add testOutput macro to test outputs such as std::cout or printf
+- Any ideas?;)
