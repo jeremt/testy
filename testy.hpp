@@ -23,7 +23,7 @@ namespace testy {
 #define Suite(name, code) \
   int main() { \
     testy::TestSuite testSuite; \
-    testSuite.displayTitle("Testy - test module "#name); \
+    testSuite.printTitle("Testy - test module "#name); \
     code \
     return testSuite.run(); \
   }
@@ -51,7 +51,7 @@ namespace testy {
  * @macro test
  * Test if the given expr is true.
  */
-#define test(expr) if (!expr) return false;
+#define test(expr) if (!(expr)) return false;
 
 /**
  * @macro testRange
@@ -84,15 +84,49 @@ class TestSuite {
   typedef std::list<std::pair<std::string, std::function<bool()>>> Unit;
   TestSuite() {}
   ~TestSuite() {}
-  inline void displayTitle(std::string const &title);
-  inline void displaySubtitle(std::string const &subTitle);
+
+  /**
+   * Print the title of the test suite.
+   */
+  inline void printTitle(std::string const &title);
+
+  /**
+   * Print a subtitle.
+   */
+  inline void printSubtitle(std::string const &subtitle);
+
+  /**
+   * Print a fail label.
+   */
+  inline void printFail(bool isFinal = false);
+
+  /**
+   * Print a success label.
+   */
+  inline void printSuccess(bool isFinal = false);
+
+  /**
+   * Clear the print format (useful with colors for instance).
+   */
+  inline void printClear();
+
+  /**
+   * Register a new unit test.
+   * @param desc The description of this unit.
+   * @param unit The unit which contains all tests.
+   */
   inline void addUnit(std::string const &desc, Unit const &unit);
+
+  /**
+   * Return all unit tests.
+   * @return Returns the number of failures or 0 on success.
+   */
   inline int run();
  private:
   std::list<std::pair<std::string, Unit>> _units;
 };
 
-inline void TestSuite::displayTitle(std::string const &title) {
+void TestSuite::printTitle(std::string const &title) {
     std::cout << std::endl << "  \e[1m" << title << std::endl;
     std::cout << "  ";
     for (size_t i = 0; i < title.size(); ++i)
@@ -100,25 +134,30 @@ inline void TestSuite::displayTitle(std::string const &title) {
     std::cout << "\e[m"<< std::endl;
 }
 
-inline void TestSuite::displaySubtitle(std::string const &subTitle) {
-  std::cout << "  \e[m## " << subTitle << std::endl << std::endl;
+void TestSuite::printSubtitle(std::string const &subtitle) {
+  std::cout << "  \e[m## " << subtitle << std::endl << std::endl;
 }
 
-/**
- * Register a new unit test.
- * @param desc The description of this unit.
- * @param unit The unit which contains all tests.
- */
-inline void TestSuite::addUnit(std::string const &desc,
+void TestSuite::printFail(bool) {
+  std::cout << "\e[0;31m✗ ";
+}
+
+void TestSuite::printSuccess(bool isFinal) {
+  std::cout << "\e[0;32m✓ ";
+  if (!isFinal)
+    std::cout << "\e[1;30m";
+}
+
+void TestSuite::printClear() {
+  std::cout << "\e[m";
+}
+
+void TestSuite::addUnit(std::string const &desc,
                                TestSuite::Unit const &unit) {
   _units.push_back(std::make_pair(desc, unit));
 }
 
-/**
- * Return all unit tests.
- * @return Returns the number of failures or 0 on success.
- */
-inline int TestSuite::run() {
+int TestSuite::run() {
   std::chrono::steady_clock::time_point prev;
   int fail = 0;
   int total = 0;
@@ -128,7 +167,7 @@ inline int TestSuite::run() {
   for (auto &unit : _units) {
 
     // Display the test description
-    displaySubtitle(unit.first);
+    printSubtitle(unit.first);
 
     for (auto &test : unit.second) {
 
@@ -139,22 +178,20 @@ inline int TestSuite::run() {
       try {
         if (!test.second()) { // false if callback return false
           ++fail;
-          std::cout << "\e[0;31m✗ ";
+          printFail();
         } else { // succeed otherwise
-          std::cout << "\e[0;32m✓ \e[1;30m";
+          printSuccess();
         }
       } catch (...) { // fail if an unexpected exception is thrown.
         ++fail;
-        std::cout << "\e[0;31m✗ ";
+        printFail();
       }
 
       // and duration of the function call
 
       size_t delta = (std::chrono::steady_clock::now() - prev).count() / 1000;
       duration += delta;
-      std::cout << test.first << " ("
-                << std::fixed << delta
-                << "ms)" << std::endl;
+      std::cout << test.first << " (" << delta << "ms)" << std::endl;
       ++total;
     }
     std::cout << std::endl;
@@ -163,15 +200,18 @@ inline int TestSuite::run() {
   // Display the result of the tests
 
   if (fail) {
-    std::cout << "  \e[0;31m✗ " << fail << " of "
-              << total << " tests failed "
+    std::cout << "  ";
+    printFail();
+    std::cout << fail << " of " << total << " tests failed "
               << "(" << duration << "ms)";
   } else {
-    std::cout << "  \e[0;32m✓ " << total
-              << " tests completed "
+    std::cout << "  ";
+    printSuccess(true);
+    std::cout << total << " tests completed "
               << "(" << duration << "ms)";
   }
-  std::cout << "\e[m" << std::endl << std::endl;
+  printClear();
+  std::cout << std::endl << std::endl;
 
 // Wait for keyboard press on windows to keep the output console opened.
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)

@@ -5,14 +5,13 @@ class Calculator {
 public:
   Calculator();
   ~Calculator();
-  static Calculator &getInstance();
   void bigCalc();
   template<typename Type>
   Type add(Type a, Type b);
   template<typename Type>
   bool isNumber(Type const &value);
-private:
-  static Calculator _instance;
+public:
+  static Calculator instance;
 };
 
 template<typename Type>

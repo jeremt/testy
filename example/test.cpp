@@ -8,20 +8,20 @@ Suite("myModule", {
   describe("Calculator",
 
     it("Should add numbers correctly",
-      test(Calculator::getInstance().add(1, 2) == 3)
-      test(Calculator::getInstance().add(-1, 2) == 1)
-      test(Calculator::getInstance().add(42, 42) == 84)
-      testRange(Calculator::getInstance().add(2, 2), 3, 5)
+      test(Calculator::instance.add(1, 2) == 3)
+      test(Calculator::instance.add(-1, 2) == 1)
+      test(Calculator::instance.add(42, 42) == 84)
+      testRange(Calculator::instance.add(2, 2), 3, 5)
     ),
 
     it("Should not be a number",
-      test(Calculator::getInstance().isNumber("test") == false)
+      test(Calculator::instance.isNumber("test") == false)
     ),
 
     it("Should fail", test(false)),
 
     it("Should take time",
-      Calculator::getInstance().bigCalc();
+      Calculator::instance.bigCalc();
     )
 
   )

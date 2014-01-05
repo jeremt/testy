@@ -4,15 +4,11 @@
 #include "Calculator.hpp"
 #include <iostream>
 
-Calculator Calculator::_instance;
+Calculator Calculator::instance;
 
 Calculator::Calculator() {}
 
 Calculator::~Calculator() {}
-
-Calculator &Calculator::getInstance() {
-  return _instance;
-}
 
 void Calculator::bigCalc() {
   size_t iter = 42;
