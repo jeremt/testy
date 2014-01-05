@@ -1,4 +1,5 @@
 
+#include <stdexcept>
 #include "testy.hpp"
 #include "Calculator.hpp"
 
@@ -7,28 +8,31 @@ Suite("myModule", {
   describe("Calculator",
 
     it("Should equals to 4",
-      return Calculator::getInstance().add(1, 2) == 3;
+      test(Calculator::getInstance().add(1, 2) == 3)
     ),
 
     it("Should not be a number",
-      return Calculator::getInstance().isNumber("test") == false;
+      test(Calculator::getInstance().isNumber("test") == false)
     ),
 
-    it("Should fail",
-      return false;
-    ),
+    it("Should fail", test(false)),
 
     it("Should take time",
       Calculator::getInstance().bigCalc();
-      return true;
     )
 
   )
 
-  describe("Useless tests",
+  describe("GlobalTests",
 
-    it("Should return true",
-      return true;
+    it("Should return true", ),
+
+    it("Shoud throw a runtime error",
+      testThrow(throw std::runtime_error("test");, std::runtime_error)
+    ),
+
+    it ("Should fail by throwing the wrong exception",
+      testThrow(throw std::invalid_argument("test");, std::out_of_range)
     )
 
   )

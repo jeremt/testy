@@ -44,9 +44,20 @@ namespace testy {
 #define it(text, code) \
   {text, [] () { \
       code \
+      return true; \
     }}
 
-#define test(expr) return expr;
+/**
+ * @macro test
+ * Test if the given expr is true.
+ */
+#define test(expr) if (!expr) return false;
+
+/**
+ * @macro testThrow
+ * Test if the given `expr` throw the given `except`.
+ */
+#define testThrow(expr, except) try { expr } catch (except) {}
 
 /**
  * TestSuite
@@ -113,11 +124,16 @@ inline int TestSuite::run() {
 
       prev = std::chrono::steady_clock::now();
       std::cout << "    ";
-      if (!test.second()) {
+      try {
+        if (!test.second()) { // false if callback return false
+          ++fail;
+          std::cout << "\e[0;31m✗ ";
+        } else { // succeed otherwise
+          std::cout << "\e[0;32m✓ \e[1;30m";
+        }
+      } catch (...) { // fail if an unexpected exception is thrown.
         ++fail;
         std::cout << "\e[0;31m✗ ";
-      } else {
-        std::cout << "\e[0;32m✓ \e[1;30m";
       }
 
       // and duration of the function call
