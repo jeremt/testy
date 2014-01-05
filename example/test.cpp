@@ -7,8 +7,11 @@ Suite("myModule", {
 
   describe("Calculator",
 
-    it("Should equals to 4",
+    it("Should add numbers correctly",
       test(Calculator::getInstance().add(1, 2) == 3)
+      test(Calculator::getInstance().add(-1, 2) == 1)
+      test(Calculator::getInstance().add(42, 42) == 84)
+      testRange(Calculator::getInstance().add(2, 2), 3, 5)
     ),
 
     it("Should not be a number",

@@ -54,6 +54,18 @@ namespace testy {
 #define test(expr) if (!expr) return false;
 
 /**
+ * @macro testRange
+ * Test if the given expr is in the given range.
+ */
+#define testRange(expr, begin, end) \
+  { \
+    auto const &val = expr; \
+    if (val > end || val < begin) \
+      return false; \
+  }
+
+
+/**
  * @macro testThrow
  * Test if the given `expr` throw the given `except`.
  */
