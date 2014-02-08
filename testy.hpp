@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <list>
@@ -41,9 +40,9 @@ namespace testy {
  * @macro
  * Test one action of the suite.
  */
-#define it(text, code) \
+#define it(text, ...) \
   {text, [] () { \
-      code \
+      __VA_ARGS__ \
       return true; \
     }}
 
