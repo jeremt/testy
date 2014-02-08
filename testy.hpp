@@ -16,41 +16,48 @@
 namespace testy {
 
 /**
- * @macro
+ * @macro Suite
  * The macro used to create the test suite.
  */
 #define Suite(name, code) \
   int main() { \
-    testy::TestSuite testSuite; \
-    testSuite.printTitle("Testy - test module "#name); \
+    testy::TestSuite testSuite(name); \
     code \
     return testSuite.run(); \
   }
 
 /**
- * @macro
+ * @macro describe
  * Describe one entity of the suite.
  */
 #define describe(name, ...) \
-  testSuite.addUnit(name, { \
+  testSuite.addTest(name, { \
     __VA_ARGS__ \
   });
 
 /**
- * @macro
+ * @macro example
+ */
+#define example(name, ...) \
+  testSuite.addExample(name, [&] () { \
+    __VA_ARGS__ \
+  });
+
+/**
+ * @macro it
  * Test one action of the suite.
  */
 #define it(text, ...) \
-  {text, [] () { \
+  {text, [&] () { \
       __VA_ARGS__ \
-      return true; \
+      return ""; \
     }}
 
 /**
  * @macro test
  * Test if the given expr is true.
  */
-#define test(expr) if (!(expr)) return false;
+#define test(expr) if (!(expr)) return #expr;
 
 /**
  * @macro testRange
@@ -60,7 +67,7 @@ namespace testy {
   { \
     auto const &val = expr; \
     if (val > end || val < begin) \
-      return false; \
+      return #expr; \
   }
 
 
@@ -71,75 +78,30 @@ namespace testy {
 #define testThrow(expr, except) try { expr } catch (except) {}
 
 /**
- * @enum Theme
- * Display theme.
- */
-enum Theme { Default, Classic };
-
-/**
  * TestSuite
  * Simple test suite in which you can register units and run all unit tests.
  */
 class TestSuite {
  public:
-
   /**
    * @typedef Unit
    * Describe a unit to test.
    */
-  typedef std::list<std::pair<std::string, std::function<bool()>>> Unit;
-
-  TestSuite() {}
-
+  typedef std::list<std::pair<std::string, std::function<std::string()>>> Unit;
+  TestSuite(std::string const &name) : _name(name) {}
   ~TestSuite() {}
-
-  /**
-   * Set the current print theme.
-   */
-  inline void setTheme(Theme theme);
-
-  /**
-   * Print the title of the test suite.
-   */
-  inline void printTitle(std::string const &title);
-
-  /**
-   * Print a subtitle.
-   */
-  inline void printSubtitle(std::string const &subtitle);
-
-  /**
-   * Print a fail label.
-   */
-  inline void printFail(bool isFinal = false);
-
-  /**
-   * Print a success label.
-   */
-  inline void printSuccess(bool isFinal = false);
-
-  /**
-   * Clear the print format (useful with colors for instance).
-   */
-  inline void printClear();
-
-  /**
-   * Register a new unit test.
-   * @param desc The description of this unit.
-   * @param unit The unit which contains all tests.
-   */
-  inline void addUnit(std::string const &desc, Unit const &unit);
-
-  /**
-   * Return all unit tests.
-   * @return Returns the number of failures or 0 on success.
-   */
+  inline void displayTitle(std::string const &title);
+  inline void displaySubtitle(std::string const &subTitle);
+  inline void addTest(std::string const &desc, Unit const &unit);
+  inline void addExample(std::string const &, std::function<void()> const &);
   inline int run();
  private:
-  std::list<std::pair<std::string, Unit>> _units;
+  std::string _name;
+  std::list<std::pair<std::string, Unit>> _tests;
+  std::list<std::pair<std::string, std::function<void()>>> _examples;
 };
 
-void TestSuite::printTitle(std::string const &title) {
+inline void TestSuite::displayTitle(std::string const &title) {
     std::cout << std::endl << "  \e[1m" << title << std::endl;
     std::cout << "  ";
     for (size_t i = 0; i < title.size(); ++i)
@@ -147,84 +109,110 @@ void TestSuite::printTitle(std::string const &title) {
     std::cout << "\e[m"<< std::endl;
 }
 
-void TestSuite::printSubtitle(std::string const &subtitle) {
-  std::cout << "  \e[m## " << subtitle << std::endl << std::endl;
+inline void TestSuite::displaySubtitle(std::string const &subTitle) {
+  std::cout << "  \e[m## " << subTitle << std::endl << std::endl;
 }
 
-void TestSuite::printFail(bool) {
-  std::cout << "\e[0;31m✗ ";
-}
-
-void TestSuite::printSuccess(bool isFinal) {
-  std::cout << "\e[0;32m✓ ";
-  if (!isFinal)
-    std::cout << "\e[1;30m";
-}
-
-void TestSuite::printClear() {
-  std::cout << "\e[m";
-}
-
-void TestSuite::addUnit(std::string const &desc,
+/**
+ * Register a new unit test.
+ * @param desc The description of this unit.
+ * @param unit The unit which contains all tests.
+ */
+inline void TestSuite::addTest(std::string const &desc,
                                TestSuite::Unit const &unit) {
-  _units.push_back(std::make_pair(desc, unit));
+  _tests.push_back(std::make_pair(desc, unit));
 }
 
-int TestSuite::run() {
+/**
+ * Register an example, with a simple "classic" output.
+ */
+inline void TestSuite::addExample(std::string const &desc,
+                                  std::function<void()> const &fn) {
+  _examples.push_back(std::make_pair(desc, fn));
+}
+
+/**
+ * Return all unit tests.
+ * @return Returns the number of failures or 0 on success.
+ */
+inline int TestSuite::run() {
   std::chrono::steady_clock::time_point prev;
   int fail = 0;
   int total = 0;
   size_t duration = 0;
 
-  std::cout << std::endl;
-  for (auto &unit : _units) {
+  if (!_tests.empty()) {
 
-    // Display the test description
-    printSubtitle(unit.first);
+    displayTitle(_name + "'s module unit tests");
+    std::cout << std::endl;
+    for (auto &unit : _tests) {
 
-    for (auto &test : unit.second) {
+      // Display the test description
+      displaySubtitle(unit.first);
 
-      // Run the test and display the fail or success message
+      for (auto &test : unit.second) {
 
-      prev = std::chrono::steady_clock::now();
-      std::cout << "    ";
-      try {
-        if (!test.second()) { // false if callback return false
+        // Run the test and display the fail or success message
+
+        prev = std::chrono::steady_clock::now();
+        std::cout << "    ";
+        std::string error;
+        try {
+          error = test.second();
+          if (!error.empty()) { // message isnt empty
+            ++fail;
+            std::cout << "\e[0;31m✗ ";
+          } else { // succeed otherwise
+            std::cout << "\e[0;32m✓ \e[1;30m";
+          }
+        } catch (...) { // fail if an unexpected exception is thrown.
           ++fail;
-          printFail();
-        } else { // succeed otherwise
-          printSuccess();
+          std::cout << "\e[0;31m✗ ";
         }
-      } catch (...) { // fail if an unexpected exception is thrown.
-        ++fail;
-        printFail();
+
+        // and duration of the function call
+
+        size_t delta = (std::chrono::steady_clock::now() - prev).count() / 1000;
+        duration += delta;
+        std::cout << test.first << " ("
+                  << std::fixed << delta
+                  << "ms)" << std::endl;
+
+        // display error message
+
+        if (!error.empty())
+          std::cout << "        tested code `" << error << "`" << std::endl;
+
+        ++total;
       }
+      std::cout << std::endl;
 
-      // and duration of the function call
+    }
 
-      size_t delta = (std::chrono::steady_clock::now() - prev).count() / 1000;
-      duration += delta;
-      std::cout << test.first << " (" << delta << "ms)" << std::endl;
-      ++total;
+    // Display the result of the tests
+
+    if (fail) {
+      std::cout << "  \e[0;31m✗ " << fail << " of "
+                << total << " tests failed "
+                << "(" << duration << "ms)";
+    } else {
+      std::cout << "  \e[0;32m✓ " << total
+                << " tests completed "
+                << "(" << duration << "ms)";
+    }
+    std::cout << "\e[m" << std::endl << std::endl;
+  }
+
+  if (!_examples.empty()) {
+    displayTitle(_name + "'s module examples");
+    std::cout << std::endl;
+    for (auto const &example : _examples) {
+      displaySubtitle(example.first);
+      example.second();
+      std::cout << std::endl;
     }
     std::cout << std::endl;
   }
-
-  // Display the result of the tests
-
-  if (fail) {
-    std::cout << "  ";
-    printFail();
-    std::cout << fail << " of " << total << " tests failed "
-              << "(" << duration << "ms)";
-  } else {
-    std::cout << "  ";
-    printSuccess(true);
-    std::cout << total << " tests completed "
-              << "(" << duration << "ms)";
-  }
-  printClear();
-  std::cout << std::endl << std::endl;
 
 // Wait for keyboard press on windows to keep the output console opened.
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)

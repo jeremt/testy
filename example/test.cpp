@@ -18,7 +18,7 @@ Suite("myModule", {
       test(Calculator::instance.isNumber("test") == false)
     ),
 
-    it("Should fail", test(false)),
+    it("Should fail", test(false == true && 42 != 42)),
 
     it("Should take time",
       Calculator::instance.bigCalc();
@@ -38,6 +38,10 @@ Suite("myModule", {
       testThrow(throw std::invalid_argument("test");, std::out_of_range)
     )
 
+  )
+
+  example("Simple example",
+    std::cout << "My Simple example..." << std::endl;
   )
 
 })
