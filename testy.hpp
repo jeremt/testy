@@ -72,18 +72,32 @@ namespace testy {
 #define testThrow(expr, except) try { expr } catch (except) {}
 
 /**
+ * @enum Theme
+ * Display theme.
+ */
+enum Theme { Default, Classic };
+
+/**
  * TestSuite
  * Simple test suite in which you can register units and run all unit tests.
  */
 class TestSuite {
  public:
+
   /**
    * @typedef Unit
    * Describe a unit to test.
    */
   typedef std::list<std::pair<std::string, std::function<bool()>>> Unit;
+
   TestSuite() {}
+
   ~TestSuite() {}
+
+  /**
+   * Set the current print theme.
+   */
+  inline void setTheme(Theme theme);
 
   /**
    * Print the title of the test suite.
