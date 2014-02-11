@@ -143,7 +143,7 @@ inline int TestSuite::run() {
 
   if (!_tests.empty()) {
 
-    displayTitle(_name + "'s module unit tests");
+    displayTitle(_name + "'s tests");
     std::cout << std::endl;
     for (auto &unit : _tests) {
 
@@ -161,13 +161,13 @@ inline int TestSuite::run() {
           error = test.second();
           if (!error.empty()) { // message isnt empty
             ++fail;
-            std::cout << "\e[0;31m✗ ";
+            std::cout << "\e[0;31mâœ— ";
           } else { // succeed otherwise
-            std::cout << "\e[0;32m✓ \e[1;30m";
+            std::cout << "\e[0;32mâœ“ \e[1;30m";
           }
         } catch (...) { // fail if an unexpected exception is thrown.
           ++fail;
-          std::cout << "\e[0;31m✗ ";
+          std::cout << "\e[0;31mâœ— ";
         }
 
         // and duration of the function call
@@ -181,7 +181,7 @@ inline int TestSuite::run() {
         // display error message
 
         if (!error.empty())
-          std::cout << "        tested code `" << error << "`" << std::endl;
+          std::cout << "        failed with `" << error << "`" << std::endl;
 
         ++total;
       }
@@ -192,11 +192,11 @@ inline int TestSuite::run() {
     // Display the result of the tests
 
     if (fail) {
-      std::cout << "  \e[0;31m✗ " << fail << " of "
+      std::cout << "  \e[0;31mâœ— " << fail << " of "
                 << total << " tests failed "
                 << "(" << duration << "ms)";
     } else {
-      std::cout << "  \e[0;32m✓ " << total
+      std::cout << "  \e[0;32mâœ“ " << total
                 << " tests completed "
                 << "(" << duration << "ms)";
     }
@@ -204,7 +204,7 @@ inline int TestSuite::run() {
   }
 
   if (!_examples.empty()) {
-    displayTitle(_name + "'s module examples");
+    displayTitle(_name + "'s examples");
     std::cout << std::endl;
     for (auto const &example : _examples) {
       displaySubtitle(example.first);
